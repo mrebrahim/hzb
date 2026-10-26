@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { DemoLogin } from '@/components/DemoLogin';
 
 function LoginForm() {
   const router = useRouter();
@@ -50,6 +51,7 @@ export default function LoginPage() {
       <h1 className="h1 mb-1 text-center">منظومة التنظيم</h1>
       <p className="muted mb-6 text-center">مهامك، حضورك، ونقاطك في مكان واحد</p>
       <Suspense><LoginForm /></Suspense>
+      {process.env.NEXT_PUBLIC_DEMO !== 'off' && <DemoLogin />}
     </main>
   );
 }

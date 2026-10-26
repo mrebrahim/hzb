@@ -41,7 +41,7 @@ export const ACTIVITY_STATUS: Record<string, { label: string; cls: string }> = {
   suspended: { label: 'موقوف', cls: 'bg-gray-200 text-gray-700' },
 };
 
-export const ROLES = { member: 'عضو', coordinator: 'منسق/أمين', admin: 'أدمن' } as const;
+export const ROLES = { member: 'عضو', assistant: 'أمين مساعد', coordinator: 'أمين', admin: 'أدمن النظام' } as const;
 export const UNIT_TYPES = { national: 'مركزي', governorate: 'محافظة', center: 'مركز/قسم', unit: 'وحدة/قرية' } as const;
 
 export const DAYS = ['الأحد', 'الاتنين', 'التلات', 'الأربع', 'الخميس', 'الجمعة', 'السبت'];

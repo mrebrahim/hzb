@@ -6,7 +6,7 @@ export type Profile = {
   full_name: string;
   phone: string | null;
   unit_id: string | null;
-  role: 'member' | 'coordinator' | 'admin';
+  role: 'member' | 'assistant' | 'coordinator' | 'admin';
   activity_status: string;
   motivations: string[];
   skills: string[];

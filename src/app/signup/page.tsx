@@ -18,7 +18,7 @@ function SignupForm() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    createClient().from('units').select('id,name,type,parent_id').order('name').then(({ data }) => setUnits(data ?? []));
+    createClient().from('units').select('id,name,type,parent_id').eq('is_demo', false).order('name').then(({ data }) => setUnits(data ?? []));
   }, []);
 
   const govs = units.filter((u) => u.type === 'governorate');

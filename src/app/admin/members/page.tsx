@@ -17,6 +17,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
   const [{ data: members }, units] = await Promise.all([query.returns<M[]>(), getScopeUnits(supabase)]);
   const unitLabel = new Map(units.map((u) => [u.id, u.label]));
   const isAdmin = profile.role === 'admin';
+  const canEdit = profile.role !== 'assistant';
 
   return (
     <div className="space-y-3">
@@ -47,8 +48,10 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
                 <td className="text-xs">{fmtDate(m.last_active_at)}</td>
                 <td className="text-xs">{m.skills.join('، ') || '—'}</td>
                 <td>
-                  <MemberRoleForm member={{ id: m.id, role: m.role, unit_id: m.unit_id, activity_status: m.activity_status }}
-                    units={units.map(({ id, label }) => ({ id, label }))} isAdmin={isAdmin} self={m.id === profile.id} />
+                  {canEdit ? (
+                    <MemberRoleForm member={{ id: m.id, role: m.role, unit_id: m.unit_id, activity_status: m.activity_status }}
+                      units={units.map(({ id, label }) => ({ id, label }))} isAdmin={isAdmin} self={m.id === profile.id} />
+                  ) : <span className="text-xs">{ROLES[m.role]}</span>}
                 </td>
               </tr>
             ))}
