@@ -36,8 +36,7 @@ begin
   return new;
 end $$;
 
-drop policy units_insert on public.units;
-create policy units_insert on public.units for insert to authenticated
+alter policy units_insert on public.units
   with check (public.is_admin() or (public.is_manager() and parent_id is not null and public.in_my_scope(parent_id)));
 
 create or replace function public.notify_unit_staff(p_unit uuid, p_title text, p_body text, p_link text default null) returns void
@@ -57,7 +56,7 @@ begin
 end $$;
 
 -- ───────────────────────── تنظيم الديمو (منفصل عن التنظيم الحقيقي) ─────────────────────────
-alter table public.units add column is_demo boolean not null default false;
+alter table public.units add column if not exists is_demo boolean not null default false;
 
 create or replace function public.scope_root() returns uuid
 language sql stable security definer set search_path = '' as $$
