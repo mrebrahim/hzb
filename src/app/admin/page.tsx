@@ -210,7 +210,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           <div className="mb-3 flex items-center gap-2"><Icon name="chart" className="h-4 w-4 text-navy-600" /><h2 className="section-title">الأعضاء النشطون أسبوعياً</h2></div>
           <div className="flex h-44 items-end gap-2 border-b border-slate-200">
             {weeks.map((x, i) => (
-              <div key={x.week} className="flex flex-1 flex-col items-center gap-1">
+              <div key={x.week} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
                 <span className="text-[11px] font-semibold text-slate-600">{x.active_members}</span>
                 <div className={`w-full rounded-t ${i === weeks.length - 1 ? 'bg-gold-500' : 'bg-navy-600'}`}
                   style={{ height: `${(x.active_members / maxActive) * 100}%`, minHeight: 3 }} title={`${x.points} نقطة • ${x.approved} تكليف • ${x.attendance} حضور`} />
