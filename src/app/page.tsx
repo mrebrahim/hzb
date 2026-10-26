@@ -173,7 +173,7 @@ export default async function Home() {
                     </dl>
                     {o.match_reason && <p className="text-xs text-slate-500"><span className="font-semibold text-slate-700">أسباب الترشيح: </span>{o.match_reason.split(' • ').join('، ')}</p>}
                     <div className="flex items-center gap-2 pt-1">
-                      <RpcButton fn="accept_assignment" args={{ p_id: o.id }} label="قبول التكليف" done={() => 'تم تسجيل قبولك للتكليف'} />
+                      <RpcButton fn="accept_assignment" args={{ p_id: o.id }} label="قبول التكليف" doneMessage="تم تسجيل قبولك للتكليف" />
                       <RpcButton fn="decline_assignment" args={{ p_id: o.id }} label="اعتذار" className="btn-ghost" />
                     </div>
                   </div>

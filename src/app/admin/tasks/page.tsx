@@ -48,7 +48,7 @@ export default async function TasksPage() {
                     {t.status === 'open' && (
                       <>
                         <RpcButton fn="distribute_task" args={{ p_task: t.id }} label="وزّع" className="btn-ghost px-3 py-1"
-                          done={(n) => (Number(n) > 0 ? `اتعرضت على ${n}` : 'مفيش مرشحين مناسبين حالياً')} />
+                          doneMessage="عُرض على {n} عضو" emptyMessage="لا يوجد مرشحون مناسبون حالياً" />
                         <TaskCloseButton id={t.id} />
                       </>
                     )}

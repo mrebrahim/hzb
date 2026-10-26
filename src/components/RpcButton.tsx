@@ -9,10 +9,12 @@ type Props = {
   label: string;
   className?: string;
   confirm?: string;
-  done?: (data: unknown) => string | void;
+  // رسالة النجاح؛ {n} بتتبدل بنتيجة الدالة. (نص مش function عشان ينفع يتبعت من Server Component)
+  doneMessage?: string;
+  emptyMessage?: string;
 };
 
-export function RpcButton({ fn, args, label, className = 'btn-primary', confirm, done }: Props) {
+export function RpcButton({ fn, args, label, className = 'btn-primary', confirm, doneMessage, emptyMessage }: Props) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
@@ -28,8 +30,8 @@ export function RpcButton({ fn, args, label, className = 'btn-primary', confirm,
       return;
     }
     setErr(false);
-    const m = done?.(data);
-    if (m) setMsg(m);
+    if (emptyMessage && !Number(data)) setMsg(emptyMessage);
+    else if (doneMessage) setMsg(doneMessage.replace('{n}', String(data ?? '')));
     start(() => router.refresh());
   }
 
