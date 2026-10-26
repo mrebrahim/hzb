@@ -8,6 +8,6 @@ export function CopyButton({ text, label }: { text: string; label: string }) {
       await navigator.clipboard.writeText(text);
       setDone(true);
       setTimeout(() => setDone(false), 2000);
-    }}>{done ? 'اتنسخ ✓' : label}</button>
+    }}>{done ? 'تم النسخ' : label}</button>
   );
 }

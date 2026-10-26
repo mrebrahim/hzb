@@ -19,7 +19,7 @@ function CheckIn() {
       const { data, error } = await createClient().rpc('check_in', { p_event: e, p_token: t, p_lat: lat, p_lng: lng });
       if (error) return setState({ ok: false, msg: error.message });
       const r = data as { status: string; title: string; points?: number };
-      setState({ ok: true, msg: r.status === 'already' ? `إنت مسجّل بالفعل في "${r.title}"` : `تم تسجيل حضورك في "${r.title}" — +${r.points} نقطة 🎉` });
+      setState({ ok: true, msg: r.status === 'already' ? `إنت مسجّل بالفعل في "${r.title}"` : `تم تسجيل حضورك في "${r.title}" — أُضيفت ${r.points} نقطة إلى رصيدك` });
     };
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -33,7 +33,7 @@ function CheckIn() {
   return (
     <div className="card text-center">
       {!state && <p>جاري تسجيل حضورك... (بنستخدم موقعك لحظة التسجيل بس)</p>}
-      {state && <p className={`text-lg font-semibold ${state.ok ? 'text-emerald-700' : 'text-rose-600'}`}>{state.msg}</p>}
+      {state && <p className={`text-lg font-semibold ${state.ok ? 'text-emerald-700' : 'text-red-600'}`}>{state.msg}</p>}
       <Link href="/" className="btn-ghost mt-4">رجوع لمهامي</Link>
     </div>
   );

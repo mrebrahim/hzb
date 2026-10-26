@@ -24,9 +24,9 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
       <div className="flex flex-wrap items-center gap-2">
         <h1 className="h1 ml-auto">الأعضاء ({members?.length ?? 0})</h1>
         <form className="flex gap-1"><input name="q" defaultValue={q} className="input w-40" placeholder="بحث بالاسم" />{status && <input type="hidden" name="status" value={status} />}</form>
-        <Link href="/admin/members" className={`chip py-1 ${!status ? 'bg-brand-100' : 'bg-gray-100'}`}>الكل</Link>
+        <Link href="/admin/members" className={`chip py-1 ${!status ? 'bg-brand-100' : 'bg-slate-100'}`}>الكل</Link>
         {Object.entries(ACTIVITY_STATUS).map(([k, v]) => (
-          <Link key={k} href={`/admin/members?status=${k}`} className={`chip py-1 ${status === k ? 'ring-2 ring-brand-500' : ''} ${v.cls}`}>{v.label}</Link>
+          <Link key={k} href={`/admin/members?status=${k}`} className={`chip py-1 ${status === k ? 'ring-2 ring-navy-500' : ''} ${v.cls}`}>{v.label}</Link>
         ))}
       </div>
       {status === 'dormant' && (
@@ -36,14 +36,14 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
       )}
       <section className="card overflow-x-auto">
         <table className="w-full min-w-[720px] text-sm">
-          <thead className="text-right text-xs text-gray-500">
+          <thead className="text-right text-xs text-slate-500">
             <tr><th className="py-2">الاسم</th><th>الوحدة</th><th>الحالة</th><th>آخر نشاط</th><th>المهارات</th><th>الدور</th></tr>
           </thead>
           <tbody>
             {(members ?? []).map((m) => (
-              <tr key={m.id} className="border-t border-gray-50 align-top">
+              <tr key={m.id} className="border-t border-slate-50 align-top">
                 <td className="py-2"><p className="font-semibold">{m.full_name}</p><p className="muted text-xs" dir="ltr">{m.phone}</p></td>
-                <td className="text-xs">{m.unit_id ? unitLabel.get(m.unit_id) ?? '—' : <span className="text-rose-600">بدون وحدة</span>}</td>
+                <td className="text-xs">{m.unit_id ? unitLabel.get(m.unit_id) ?? '—' : <span className="text-red-600">بدون وحدة</span>}</td>
                 <td><span className={`chip ${ACTIVITY_STATUS[m.activity_status]?.cls}`}>{ACTIVITY_STATUS[m.activity_status]?.label}</span></td>
                 <td className="text-xs">{fmtDate(m.last_active_at)}</td>
                 <td className="text-xs">{m.skills.join('، ') || '—'}</td>

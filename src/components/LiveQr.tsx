@@ -27,10 +27,10 @@ export function LiveQr({ eventId }: { eventId: string }) {
     return () => { clearTimeout(timer); clearInterval(tick); };
   }, [eventId]);
 
-  if (error) return <p className="text-rose-600">{error}</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
   return (
     <div className="flex flex-col items-center gap-2">
-      <canvas ref={canvas} className="rounded-xl" />
+      <canvas ref={canvas} className="rounded-md" />
       <p className="text-sm">امسح بكاميرا الموبايل • الكود بيتغير بعد <b>{left}</b> ثانية</p>
     </div>
   );

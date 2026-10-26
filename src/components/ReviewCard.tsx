@@ -24,14 +24,14 @@ export function ReviewCard({ id, header, meta, report, photo, map }: Props) {
     <article className="card space-y-2">
       <h3 className="font-bold">{header}</h3>
       <p className="muted text-xs">{meta}</p>
-      <p className="whitespace-pre-line rounded-xl bg-gray-50 p-3 text-sm">{report}</p>
+      <p className="whitespace-pre-line rounded-md bg-slate-50 p-3 text-sm">{report}</p>
       <div className="flex flex-wrap gap-3 text-sm">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {photo && <a href={photo} target="_blank" rel="noreferrer"><img src={photo} alt="إثبات" className="h-32 rounded-xl object-cover" /></a>}
-        {map && <a href={map} target="_blank" rel="noreferrer" className="text-brand-700 underline">الموقع على الخريطة</a>}
+        {photo && <a href={photo} target="_blank" rel="noreferrer"><img src={photo} alt="إثبات" className="h-32 rounded-md object-cover" /></a>}
+        {map && <a href={map} target="_blank" rel="noreferrer" className="text-navy-700 underline">الموقع على الخريطة</a>}
       </div>
       <input value={feedback} onChange={(e) => setFeedback(e.target.value)} className="input" placeholder="كلمة شكر أو ملاحظة للعضو (بتوصله مع النتيجة)" />
-      {err && <p className="text-xs text-rose-600">{err}</p>}
+      {err && <p className="text-xs text-red-600">{err}</p>}
       <div className="flex gap-2">
         <button className="btn-primary" disabled={busy} onClick={() => review(true)}>اعتماد</button>
         <button className="btn-ghost" disabled={busy} onClick={() => review(false)}>محتاج تعديل</button>

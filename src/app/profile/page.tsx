@@ -25,11 +25,11 @@ export default async function ProfilePage() {
           <p className="muted">كل نقطة ليها سبب ومصدر، ومحدش يقدر يعدّلها — أي تصحيح بيظهر كحركة منفصلة.</p>
           {(ledger ?? []).length === 0 && <p className="muted">لسه مفيش نقاط.</p>}
           {(ledger ?? []).map((l) => (
-            <div key={l.id} className="flex justify-between border-b border-gray-50 py-1 text-sm">
+            <div key={l.id} className="flex justify-between border-b border-slate-50 py-1 text-sm">
               <span>{l.note ?? l.reason_code}</span>
               <span className="flex gap-3">
                 <span className="muted">{fmtDate(l.created_at)}</span>
-                <b className={l.amount > 0 ? 'text-emerald-700' : 'text-rose-600'}>{l.amount > 0 ? '+' : ''}{l.amount}</b>
+                <b className={l.amount > 0 ? 'text-emerald-700' : 'text-red-600'}>{l.amount > 0 ? '+' : ''}{l.amount}</b>
               </span>
             </div>
           ))}

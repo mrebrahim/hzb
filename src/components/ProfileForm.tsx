@@ -25,7 +25,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
     router.refresh();
   }
 
-  const chip = 'chip cursor-pointer gap-1 bg-gray-100 py-1 text-gray-700 has-[:checked]:bg-brand-100 has-[:checked]:text-brand-900';
+  const chip = 'chip cursor-pointer gap-1 bg-slate-100 py-1 text-slate-700 has-[:checked]:bg-brand-100 has-[:checked]:text-brand-900';
   return (
     <form onSubmit={onSubmit} className="card space-y-3">
       <h2 className="h2">بياناتي وتفضيلاتي</h2>

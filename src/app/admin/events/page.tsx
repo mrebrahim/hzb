@@ -25,13 +25,13 @@ export default async function EventsPage() {
         {(events ?? []).map((e) => {
           const live = Date.now() > Date.parse(e.starts_at) - 30 * 60e3 && Date.now() < Date.parse(e.ends_at);
           return (
-            <div key={e.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-50 py-2 text-sm">
+            <div key={e.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-50 py-2 text-sm">
               <div>
-                <p className="font-semibold">{e.title} {live && <span className="chip bg-rose-500 text-white">مباشر</span>}</p>
+                <p className="font-semibold">{e.title} {live && <span className="chip bg-red-500 text-white">مباشر</span>}</p>
                 <p className="muted text-xs">{e.units?.name} • {fmtDate(e.starts_at)} • {e.points} نقطة • {e.lat != null ? 'بتأكيد الموقع' : 'من غير تأكيد موقع'}</p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="chip bg-gray-100">{e.attendance[0]?.count ?? 0} حضور</span>
+                <span className="chip bg-slate-100">{e.attendance[0]?.count ?? 0} حضور</span>
                 {scopeIds.has(e.unit_id) && (
                   <Link href={`/admin/events/${e.id}`} className="btn-ghost px-3 py-1">{live ? 'اعرض الـ QR' : 'التفاصيل'}</Link>
                 )}

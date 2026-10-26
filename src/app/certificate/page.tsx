@@ -20,13 +20,13 @@ export default async function Certificate({ searchParams }: { searchParams: Prom
   const today = new Intl.DateTimeFormat('ar-EG', { dateStyle: 'long', timeZone: 'Africa/Cairo' }).format(new Date());
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <div className="rounded-3xl border-8 border-double border-brand-600 bg-white p-10 text-center">
-        <p className="text-sm tracking-widest text-brand-700">شهادة تقدير</p>
+      <div className="rounded-lg border-8 border-double border-brand-600 bg-white p-10 text-center">
+        <p className="text-sm tracking-widest text-navy-700">شهادة تقدير</p>
         <h1 className="mt-6 text-3xl font-bold">{name}</h1>
         <p className="mt-4 text-lg">تقديراً لمجهوده في العمل التطوعي والتنظيمي{unit ? ` في ${unit}` : ''}</p>
-        <p className="mt-6 text-2xl font-bold text-brand-700">مستوى: {level?.name}</p>
-        <p className="mt-1 text-gray-600">{total} نقطة موثّقة</p>
-        <p className="mt-10 text-sm text-gray-500">{today}</p>
+        <p className="mt-6 text-2xl font-bold text-navy-700">مستوى: {level?.name}</p>
+        <p className="mt-1 text-slate-600">{total} نقطة موثّقة</p>
+        <p className="mt-10 text-sm text-slate-500">{today}</p>
       </div>
       <div className="no-print mt-4 text-center"><PrintButton /></div>
     </main>

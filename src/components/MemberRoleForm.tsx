@@ -15,7 +15,7 @@ export function MemberRoleForm({ member, units, isAdmin, self }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  if (!open) return <button className="text-xs text-brand-700" onClick={() => setOpen(true)}>{ROLES[member.role as keyof typeof ROLES]} ✎</button>;
+  if (!open) return <button className="text-xs text-navy-700" onClick={() => setOpen(true)}>{ROLES[member.role as keyof typeof ROLES]} ✎</button>;
 
   async function save(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -50,7 +50,7 @@ export function MemberRoleForm({ member, units, isAdmin, self }: Props) {
         <option value="active">نشط</option><option value="slowing">نشاطه بيقل</option>
         <option value="dormant">خامل</option><option value="suspended">موقوف</option>
       </select>
-      {err && <p className="text-xs text-rose-600">{err}</p>}
+      {err && <p className="text-xs text-red-600">{err}</p>}
       <div className="flex gap-1"><button className="btn-primary px-2 py-1 text-xs">حفظ</button>
         <button type="button" className="btn-ghost px-2 py-1 text-xs" onClick={() => setOpen(false)}>إلغاء</button></div>
     </form>

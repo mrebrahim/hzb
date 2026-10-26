@@ -36,10 +36,10 @@ function LoginForm() {
         <label className="label" htmlFor="password">كلمة السر</label>
         <input id="password" name="password" type="password" required className="input" dir="ltr" autoComplete="current-password" />
       </div>
-      {error && <p className="text-sm text-rose-600">{error}</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
       <button className="btn-primary w-full" disabled={loading}>{loading ? '...' : 'دخول'}</button>
       <p className="muted text-center">
-        أول مرة؟ <Link href={`/signup?next=${encodeURIComponent(next)}`} className="font-semibold text-brand-700">سجّل عضويتك</Link>
+        أول مرة؟ <Link href={`/signup?next=${encodeURIComponent(next)}`} className="font-semibold text-navy-700">سجّل عضويتك</Link>
       </p>
     </form>
   );
@@ -48,8 +48,9 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <main className="mx-auto max-w-sm px-4 py-12">
-      <h1 className="h1 mb-1 text-center">منظومة التنظيم</h1>
-      <p className="muted mb-6 text-center">مهامك، حضورك، ونقاطك في مكان واحد</p>
+      <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-lg bg-navy-800"><span className="h-4 w-4 rounded-sm bg-gold-400" /></div>
+      <h1 className="h1 mb-1 text-center text-navy-800">منظومة المتابعة والأداء التنظيمي</h1>
+      <p className="muted mb-6 text-center">قياس الأداء ومتابعة التكليفات والحضور</p>
       <Suspense><LoginForm /></Suspense>
       {process.env.NEXT_PUBLIC_DEMO !== 'off' && <DemoLogin />}
     </main>

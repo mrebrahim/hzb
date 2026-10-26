@@ -10,8 +10,8 @@ export function ManualCheckIn({ eventId, members }: { eventId: string; members: 
   const hits = q.length >= 2 ? members.filter((m) => m.full_name.includes(q)).slice(0, 6) : [];
 
   return (
-    <div className="rounded-xl bg-gray-50 p-3">
-      <p className="mb-2 text-xs text-gray-600">عضو موبايله فاصل أو كبير في السن؟ سجّله يدوي (بيتسجل باسمك في سجل التدقيق).</p>
+    <div className="rounded-md bg-slate-50 p-3">
+      <p className="mb-2 text-xs text-slate-600">عضو موبايله فاصل أو كبير في السن؟ سجّله يدوي (بيتسجل باسمك في سجل التدقيق).</p>
       <input value={q} onChange={(e) => setQ(e.target.value)} className="input" placeholder="ابحث بالاسم" />
       {hits.map((m) => (
         <button key={m.id} className="mt-1 block w-full rounded-lg px-2 py-1 text-right text-sm hover:bg-white" onClick={async () => {

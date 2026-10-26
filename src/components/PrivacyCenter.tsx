@@ -34,7 +34,7 @@ export function PrivacyCenter({ consents }: { consents: Record<string, boolean> 
       {Object.entries(PURPOSES).map(([k, v]) => {
         const on = !!consents[k];
         return (
-          <div key={k} className="flex items-center justify-between gap-3 rounded-xl bg-gray-50 p-3">
+          <div key={k} className="flex items-center justify-between gap-3 rounded-md bg-slate-50 p-3">
             <div><p className="text-sm font-semibold">{v.label}</p><p className="muted text-xs">{v.note}</p></div>
             <button className={on ? 'btn-danger' : 'btn-primary'} onClick={() => toggle(k, !on)}>{on ? 'سحب الموافقة' : 'موافق'}</button>
           </div>

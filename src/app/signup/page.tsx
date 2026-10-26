@@ -105,7 +105,7 @@ function SignupForm() {
         <h2 className="h2">مهاراتك ووقتك</h2>
         <div className="flex flex-wrap gap-2">
           {SKILLS.map((s) => (
-            <label key={s} className="chip cursor-pointer gap-1 bg-gray-100 py-1 text-gray-700 has-[:checked]:bg-brand-100 has-[:checked]:text-brand-900">
+            <label key={s} className="chip cursor-pointer gap-1 bg-slate-100 py-1 text-slate-700 has-[:checked]:bg-brand-100 has-[:checked]:text-brand-900">
               <input type="checkbox" name="skills" value={s} className="hidden" /> {s}
             </label>
           ))}
@@ -114,7 +114,7 @@ function SignupForm() {
           <span className="label">الأيام اللي غالباً بتبقى فاضي فيها</span>
           <div className="flex flex-wrap gap-2">
             {DAYS.map((d, i) => (
-              <label key={d} className="chip cursor-pointer gap-1 bg-gray-100 py-1 text-gray-700 has-[:checked]:bg-brand-100 has-[:checked]:text-brand-900">
+              <label key={d} className="chip cursor-pointer gap-1 bg-slate-100 py-1 text-slate-700 has-[:checked]:bg-brand-100 has-[:checked]:text-brand-900">
                 <input type="checkbox" name="available_days" value={i} className="hidden" /> {d}
               </label>
             ))}
@@ -132,7 +132,7 @@ function SignupForm() {
           بياناتك العضوية بتعتبر بيانات حساسة حسب قانون حماية البيانات الشخصية رقم 151 لسنة 2020.
           بنجمع بس اللي محتاجينه لتنظيم العمل التطوعي، ومش بنبيعه أو بنشاركه مع أي جهة.
           تقدر تسحب موافقتك أو تحمّل بياناتك في أي وقت من صفحة &quot;ملفي وخصوصيتي&quot;.{' '}
-          <Link href="/privacy-policy" className="text-brand-700 underline" target="_blank">التفاصيل</Link>
+          <Link href="/privacy-policy" className="text-navy-700 underline" target="_blank">التفاصيل</Link>
         </p>
         <label className="flex items-start gap-2">
           <input type="checkbox" name="consent_membership" required className="mt-1 h-4 w-4 accent-brand-600" />
@@ -144,9 +144,9 @@ function SignupForm() {
         </label>
       </section>
 
-      {error && <p className="text-sm text-rose-600">{error}</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
       <button className="btn-primary w-full" disabled={loading}>{loading ? '...' : 'سجّل عضويتي'}</button>
-      <p className="muted text-center">عندك حساب؟ <Link href="/login" className="font-semibold text-brand-700">ادخل</Link></p>
+      <p className="muted text-center">عندك حساب؟ <Link href="/login" className="font-semibold text-navy-700">ادخل</Link></p>
     </form>
   );
 }

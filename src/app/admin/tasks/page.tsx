@@ -27,7 +27,7 @@ export default async function TasksPage() {
           النظام بيعرض كل مهمة على ضعف العدد المطلوب من أنسب الأعضاء، ولو حد اعتذر أو المهلة خلصت بيعرضها على غيره تلقائياً كل 15 دقيقة.
         </p>
         <table className="w-full min-w-[720px] text-sm">
-          <thead className="text-right text-xs text-gray-500">
+          <thead className="text-right text-xs text-slate-500">
             <tr><th className="py-2">المهمة</th><th>الوحدة</th><th>الأولوية</th><th>الموعد</th><th>مقبولة/مطلوب</th><th>معروضة</th><th>معتمدة</th><th></th></tr>
           </thead>
           <tbody>
@@ -36,11 +36,11 @@ export default async function TasksPage() {
               const filled = c(['accepted', 'submitted', 'rework', 'approved']);
               const late = new Date(t.deadline) < new Date() && c(['accepted', 'rework']) > 0;
               return (
-                <tr key={t.id} className="border-t border-gray-50 align-top">
+                <tr key={t.id} className="border-t border-slate-50 align-top">
                   <td className="py-2"><p className="font-semibold">{t.title}</p><p className="muted text-xs">{CATEGORIES[t.category]} • {t.base_points} نقطة</p></td>
                   <td>{t.units?.name}</td>
                   <td>{PRIORITIES[t.priority]}</td>
-                  <td className={late ? 'text-rose-600' : ''}>{fmtDate(t.deadline)}{late && ' (متأخرة)'}</td>
+                  <td className={late ? 'text-red-600' : ''}>{fmtDate(t.deadline)}{late && ' (متأخرة)'}</td>
                   <td><span className={`chip ${filled >= t.capacity ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>{filled}/{t.capacity}</span></td>
                   <td>{c(['offered'])}</td>
                   <td>{c(['approved'])}</td>

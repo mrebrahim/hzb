@@ -53,7 +53,7 @@ export function EventForm({ units }: { units: { id: string; label: string }[] })
         {coords ? <span className="text-emerald-700">✓ الحضور هيتطلب يكون في حدود النطاق</span>
                 : <span className="muted">(اختياري — من غيره QR بس)</span>}
       </div>
-      {msg && <p className="text-sm text-rose-600">{msg}</p>}
+      {msg && <p className="text-sm text-red-600">{msg}</p>}
       <button className="btn-primary">إنشاء</button>
     </form>
   );

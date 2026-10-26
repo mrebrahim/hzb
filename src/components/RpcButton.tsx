@@ -36,7 +36,7 @@ export function RpcButton({ fn, args, label, className = 'btn-primary', confirm,
   return (
     <span className="inline-flex flex-col gap-1">
       <button type="button" onClick={run} disabled={pending} className={className}>{label}</button>
-      {msg && <span className={`text-xs ${err ? 'text-rose-600' : 'text-emerald-700'}`}>{msg}</span>}
+      {msg && <span className={`text-xs ${err ? 'text-red-600' : 'text-emerald-700'}`}>{msg}</span>}
     </span>
   );
 }

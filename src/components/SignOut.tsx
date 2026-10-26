@@ -6,14 +6,14 @@ export function SignOut() {
   const router = useRouter();
   return (
     <button
-      className="whitespace-nowrap text-xs text-gray-500 hover:text-gray-800"
+      className="whitespace-nowrap text-xs text-navy-200 hover:text-white"
       onClick={async () => {
         await createClient().auth.signOut();
         router.push('/login');
         router.refresh();
       }}
     >
-      خروج
+      تسجيل الخروج
     </button>
   );
 }

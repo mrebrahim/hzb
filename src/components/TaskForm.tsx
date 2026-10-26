@@ -62,11 +62,11 @@ export function TaskForm({ units }: { units: U[] }) {
   return (
     <form key={tpl?.title ?? 'blank'} onSubmit={onSubmit} className="card space-y-3">
       <div className="flex items-center justify-between"><h2 className="h2">مهمة جديدة</h2>
-        <button type="button" className="text-sm text-gray-500" onClick={() => setOpen(false)}>إغلاق</button></div>
+        <button type="button" className="text-sm text-slate-500" onClick={() => setOpen(false)}>إغلاق</button></div>
       <div>
         <span className="label">ابدأ من قالب</span>
         <div className="flex flex-wrap gap-2">
-          {TEMPLATES.map((t) => <button type="button" key={t.title} className="chip bg-gray-100 py-1" onClick={() => setTpl(t)}>{t.title}</button>)}
+          {TEMPLATES.map((t) => <button type="button" key={t.title} className="chip bg-slate-100 py-1" onClick={() => setTpl(t)}>{t.title}</button>)}
         </div>
       </div>
       <div><label className="label">العنوان</label><input name="title" required defaultValue={tpl?.title} className="input" /></div>
@@ -84,12 +84,12 @@ export function TaskForm({ units }: { units: U[] }) {
         <span className="label">مهارات مطلوبة (اختياري — اللي معندوش ولا واحدة منها مش هيتعرض عليه)</span>
         <div className="flex flex-wrap gap-2">
           {SKILLS.map((s) => (
-            <label key={s} className="chip cursor-pointer bg-gray-100 py-1 has-[:checked]:bg-brand-100"><input type="checkbox" name="required_skills" value={s} className="hidden" />{s}</label>
+            <label key={s} className="chip cursor-pointer bg-slate-100 py-1 has-[:checked]:bg-brand-100"><input type="checkbox" name="required_skills" value={s} className="hidden" />{s}</label>
           ))}
         </div>
       </div>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="requires_photo" defaultChecked={tpl?.photo} className="accent-brand-600" /> لازم صورة إثبات</label>
-      {msg && <p className="text-sm text-rose-600">{msg}</p>}
+      {msg && <p className="text-sm text-red-600">{msg}</p>}
       <button className="btn-primary" disabled={busy}>{busy ? '...' : 'إنشاء ووزّع تلقائياً'}</button>
     </form>
   );

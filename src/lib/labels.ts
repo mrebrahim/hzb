@@ -23,7 +23,7 @@ export const SIZES = { small: 'صغيرة (10)', medium: 'متوسطة (25)', la
 export const PRIORITIES = { p0: 'حرجة', p1: 'عالية', p2: 'عادية', p3: 'مؤجلة' } as const;
 
 export const ASSIGNMENT_STATUS: Record<string, string> = {
-  offered: 'معروضة عليك',
+  offered: 'بانتظار ردك',
   accepted: 'قيد التنفيذ',
   declined: 'اعتذرت',
   expired: 'انتهت مهلتها',
@@ -64,24 +64,24 @@ export function pct(n: number, d: number) {
   return d > 0 ? Math.round((100 * n) / d) : 0;
 }
 
-export const CATEGORY_STYLE: Record<string, { emoji: string; grad: string }> = {
-  field_report: { emoji: '📋', grad: 'from-sky-500 to-indigo-500' },
-  door_to_door: { emoji: '🚪', grad: 'from-amber-500 to-orange-500' },
-  outreach: { emoji: '📣', grad: 'from-fuchsia-500 to-pink-500' },
-  community_service: { emoji: '🤝', grad: 'from-emerald-500 to-teal-500' },
-  recruitment: { emoji: '🧲', grad: 'from-violet-500 to-purple-600' },
-  event_support: { emoji: '🎪', grad: 'from-rose-500 to-red-500' },
-  training: { emoji: '🎓', grad: 'from-cyan-500 to-blue-500' },
-  media: { emoji: '📸', grad: 'from-pink-500 to-rose-500' },
-  organizing: { emoji: '🧭', grad: 'from-lime-500 to-green-600' },
+export const CATEGORY_STYLE: Record<string, { icon: string; accent: string }> = {
+  field_report: { icon: 'file', accent: 'border-navy-600' },
+  door_to_door: { icon: 'users', accent: 'border-brand-600' },
+  outreach: { icon: 'layers', accent: 'border-navy-500' },
+  community_service: { icon: 'shield', accent: 'border-brand-500' },
+  recruitment: { icon: 'users', accent: 'border-gold-500' },
+  event_support: { icon: 'calendar', accent: 'border-navy-600' },
+  training: { icon: 'award', accent: 'border-gold-500' },
+  media: { icon: 'layers', accent: 'border-navy-500' },
+  organizing: { icon: 'target', accent: 'border-brand-600' },
 };
 
-// المستويات = مسؤوليات حقيقية في التنظيم، مش نقاط تتصرف
+// المسار التنظيمي: كل مستوى = مسؤولية حقيقية في التنظيم
 export const LEVELS = [
-  { level: 1, name: 'عضو', floor: 0, emoji: '🌱', perk: 'بداية الرحلة — مهام قصيرة وواضحة' },
-  { level: 2, name: 'عضو نشط', floor: 100, emoji: '⚡', perk: 'دعوة لبرنامج تدريب القيادات الشابة' },
-  { level: 3, name: 'منسّق شارع/قرية', floor: 300, emoji: '🛡️', perk: 'قيادة فريق صغير + لقاء مع أمين المحافظة' },
-  { level: 4, name: 'مرشّح لأمانة', floor: 800, emoji: '👑', perk: 'ترشيح لعضوية الأمانة + حضور المؤتمر المركزي' },
+  { level: 1, name: 'عضو', floor: 0, perk: 'المشاركة في التكليفات الأساسية للوحدة' },
+  { level: 2, name: 'عضو نشط', floor: 100, perk: 'الترشيح لبرنامج إعداد الكوادر والقيادات' },
+  { level: 3, name: 'منسّق شارع/قرية', floor: 300, perk: 'قيادة فريق ميداني ولقاء دوري مع أمين المحافظة' },
+  { level: 4, name: 'مرشّح لأمانة', floor: 800, perk: 'الترشيح لعضوية الأمانة وحضور المؤتمر العام' },
 ];
 
 export type Stats = {
@@ -90,17 +90,26 @@ export type Stats = {
   percentile_in_unit: number | null; unit_rank: number | null; unit_siblings: number;
 };
 
-export function badges(s: Stats) {
+// شهادات التقدير الرسمية اللي العضو بيستحقها بناءً على سجله
+export function recognitions(s: Stats) {
   return [
-    { emoji: '🚀', name: 'أول خطوة', need: 'خلّص أول مهمة', on: s.approved_total >= 1 },
-    { emoji: '🔥', name: 'نَفَس طويل', need: '3 أسابيع ورا بعض', on: s.streak_weeks >= 3 },
-    { emoji: '📍', name: 'دايماً حاضر', need: 'احضر 5 فعاليات', on: s.attendance_total >= 5 },
-    { emoji: '🎯', name: 'قنّاص المهام', need: '10 مهام معتمدة', on: s.approved_total >= 10 },
-    { emoji: '⭐', name: 'نجم وحدته', need: 'أعلى 10% في وحدتك', on: (s.percentile_in_unit ?? 0) >= 90 },
-    { emoji: '🏆', name: 'فريق البطولة', need: 'وحدتك رقم 1', on: s.unit_rank === 1 },
-    { emoji: '💎', name: 'المحارب', need: '8 أسابيع ورا بعض', on: s.streak_weeks >= 8 },
-    { emoji: '👑', name: 'الأسطورة', need: '800 نقطة', on: s.total >= 800 },
+    { name: 'شهادة بدء المشاركة', need: 'إنجاز أول تكليف معتمد', on: s.approved_total >= 1 },
+    { name: 'شهادة الانتظام', need: 'نشاط 3 أسابيع متتالية', on: s.streak_weeks >= 3 },
+    { name: 'شهادة الحضور التنظيمي', need: 'حضور 5 فعاليات', on: s.attendance_total >= 5 },
+    { name: 'شهادة الإنجاز', need: '10 تكليفات معتمدة', on: s.approved_total >= 10 },
+    { name: 'شهادة التميز على مستوى الوحدة', need: 'ضمن أعلى 10% في الوحدة', on: (s.percentile_in_unit ?? 0) >= 90 },
+    { name: 'شهادة الوحدة الأولى', need: 'وحدتك في المركز الأول', on: s.unit_rank === 1 },
+    { name: 'شهادة الالتزام المستمر', need: 'نشاط 8 أسابيع متتالية', on: s.streak_weeks >= 8 },
+    { name: 'وسام الكادر التنظيمي', need: 'رصيد 800 نقطة', on: s.total >= 800 },
   ];
+}
+
+// التقييم الشهري حسب رصيد آخر 30 يوم
+export function rating(points30: number) {
+  if (points30 >= 120) return { label: 'ممتاز', cls: 'bg-brand-600 text-white' };
+  if (points30 >= 60) return { label: 'جيد جداً', cls: 'bg-brand-100 text-brand-900' };
+  if (points30 >= 25) return { label: 'جيد', cls: 'bg-navy-100 text-navy-800' };
+  return { label: 'يحتاج تحسين', cls: 'bg-red-100 text-red-800' };
 }
 
 export function initials(name: string) {
@@ -109,7 +118,7 @@ export function initials(name: string) {
 
 export function timeLeft(d: string) {
   const ms = Date.parse(d) - Date.now();
-  if (ms <= 0) return 'انتهى';
+  if (ms <= 0) return 'انتهت المهلة';
   const h = Math.floor(ms / 3600e3);
   if (h < 1) return `${Math.max(1, Math.floor(ms / 60e3))} دقيقة`;
   if (h < 48) return `${h} ساعة`;

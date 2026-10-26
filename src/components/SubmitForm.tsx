@@ -38,16 +38,16 @@ export function SubmitForm({ assignmentId, memberId, requiresPhoto }: { assignme
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-2 rounded-xl bg-gray-50 p-3">
+    <form onSubmit={onSubmit} className="space-y-2 rounded-md bg-slate-50 p-3">
       <textarea name="report" required minLength={5} rows={3} className="input" placeholder="عملت إيه؟ قابلت كام حد؟ أي ملاحظات من الأرض؟" />
       <label className="block text-sm">
         صورة {requiresPhoto ? '(مطلوبة)' : '(اختياري)'}
         <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" required={requiresPhoto} className="mt-1 block text-xs" />
       </label>
-      <label className="flex items-center gap-2 text-xs text-gray-600">
+      <label className="flex items-center gap-2 text-xs text-slate-600">
         <input type="checkbox" name="share_location" className="accent-brand-600" /> أرفق موقعي الحالي مع التقرير (مرة واحدة)
       </label>
-      {error && <p className="text-xs text-rose-600">{error}</p>}
+      {error && <p className="text-xs text-red-600">{error}</p>}
       <div className="flex gap-2">
         <button className="btn-primary" disabled={busy}>{busy ? 'جاري الإرسال...' : 'إرسال للمراجعة'}</button>
         <button type="button" className="btn-ghost" onClick={() => setOpen(false)}>إلغاء</button>
