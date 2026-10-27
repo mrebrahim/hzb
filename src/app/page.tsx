@@ -25,7 +25,7 @@ const WEEKLY_TARGET = 50;
 
 export default async function Home() {
   const { supabase, profile } = await requireProfile();
-  const [{ data: standing }, { data: acc }, { data: rows }, { data: notes }, { data: events }, { data: recent }] = await Promise.all([
+  const [{ data: standing, error: standingError }, { data: acc }, { data: rows }, { data: notes }, { data: events }, { data: recent }] = await Promise.all([
     supabase.rpc('my_standing').single<Standing>(),
     supabase.rpc('my_accountability').single<Account>(),
     supabase.from('assignments')
@@ -39,7 +39,19 @@ export default async function Home() {
       .order('created_at', { ascending: false }).limit(6),
   ]);
 
-  const s = standing!;
+  if (!standing) {
+    return (
+      <>
+        <Nav staff={profile.role !== 'member'} />
+        <main className="mx-auto max-w-3xl px-4 py-8">
+          <div className="card border-red-200 text-sm text-red-800">
+            تعذّر تحميل بيانات الأداء{standingError ? `: ${standingError.message}` : ''}. حدّث الصفحة، وإن استمرت المشكلة أبلغ الأمانة.
+          </div>
+        </main>
+      </>
+    );
+  }
+  const s = standing;
   const a = acc ?? { reliability: 0.7, overdue: 0, accepted_total: 0 };
   const now = Date.now();
   const all = rows ?? [];
