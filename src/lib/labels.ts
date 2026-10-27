@@ -36,7 +36,7 @@ export const ASSIGNMENT_STATUS: Record<string, string> = {
 
 export const ACTIVITY_STATUS: Record<string, { label: string; cls: string }> = {
   active: { label: 'نشط', cls: 'bg-emerald-100 text-emerald-800' },
-  slowing: { label: 'نشاطه بيقل', cls: 'bg-amber-100 text-amber-800' },
+  slowing: { label: 'متراجع', cls: 'bg-amber-100 text-amber-800' },
   dormant: { label: 'خامل', cls: 'bg-rose-100 text-rose-800' },
   suspended: { label: 'موقوف', cls: 'bg-gray-200 text-gray-700' },
 };

@@ -47,7 +47,7 @@ export function MemberRoleForm({ member, units, isAdmin, self }: Props) {
         {units.map((u) => <option key={u.id} value={u.id}>{u.label}</option>)}
       </select>
       <select name="status" defaultValue={member.activity_status} className="input py-1 text-xs">
-        <option value="active">نشط</option><option value="slowing">نشاطه بيقل</option>
+        <option value="active">نشط</option><option value="slowing">متراجع</option>
         <option value="dormant">خامل</option><option value="suspended">موقوف</option>
       </select>
       {err && <p className="text-xs text-red-600">{err}</p>}

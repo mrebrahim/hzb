@@ -14,6 +14,12 @@ type Champ = { member_id: string; full_name: string; unit_name: string; points_3
 type Staff = { staff_id: string; full_name: string; role: keyof typeof ROLES; unit_name: string; reviews_30: number;
                tasks_30: number; events_30: number; team_members: number; team_active: number; score: number };
 
+type Health = { members: number; new_30: number; new_prev_30: number; approved_30: number; on_time_30: number;
+  first_pass_30: number; field_reports_30: number; recruitment_30: number; avg_review_hours: number | null; events_30: number;
+  avg_attendance: number | null; leaf_units: number; inactive_units: string[] | null; units_without_staff: string[] | null };
+type Watch = { member_id: string; full_name: string; role: string; unit_name: string; activity_status: string;
+  last_active_at: string; overdue: number; reliability: number };
+
 function staffGrade(score: number, max: number) {
   const r = score / Math.max(max, 1);
   if (r >= 0.8) return { label: 'متميز', cls: 'bg-brand-600 text-white' };
@@ -26,7 +32,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const { root } = await searchParams;
   const { supabase, profile } = await requireStaff();
   const args = { p_root: root ?? null };
-  const [k, w, rootUnit, champs, staff, pending, overdue] = await Promise.all([
+  const [k, w, rootUnit, champs, staff, pending, overdue, health, perf] = await Promise.all([
     supabase.rpc('unit_kpis', args),
     supabase.rpc('weekly_activity', { ...args, p_weeks: 8 }),
     root ? supabase.from('units').select('name,parent_id').eq('id', root).single() : Promise.resolve({ data: null }),
@@ -35,6 +41,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     supabase.from('assignments').select('id', { count: 'exact', head: true }).eq('status', 'submitted'),
     supabase.from('assignments').select('id,tasks!inner(deadline)', { count: 'exact', head: true })
       .in('status', ['accepted', 'rework']).lt('tasks.deadline', new Date().toISOString()),
+    supabase.rpc('org_health', args),
+    supabase.rpc('members_performance', args),
   ]);
   if (k.error) return <p className="card text-red-700">{k.error.message}</p>;
 
@@ -49,11 +57,16 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const maxScore = Math.max(1, ...team.map((s) => s.score));
   const ranked = [...rows].filter((r) => r.members > 0)
     .sort((a, b) => b.active / b.members - a.active / a.members || b.points_30 / b.members - a.points_30 / a.members);
+  const h = (health.data ?? {}) as Health;
+  const watch = ((perf.data ?? []) as Watch[])
+    .filter((m) => m.role === 'member' && (m.overdue > 0 || Number(m.reliability) < 0.7 || m.activity_status === 'dormant'))
+    .sort((a, b) => b.overdue - a.overdue || Number(a.reliability) - Number(b.reliability)).slice(0, 8);
+  const growth = h.new_prev_30 ? Math.round(((h.new_30 - h.new_prev_30) / h.new_prev_30) * 100) : null;
   const today = new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Cairo' }).format(new Date());
 
   const alerts = [
     { n: pending.count ?? 0, text: 'تقرير بانتظار المراجعة والاعتماد', href: '/admin/review', tone: 'navy' },
-    { n: overdue.count ?? 0, text: 'تكليف تجاوز موعد التسليم', href: '/admin/tasks', tone: 'red' },
+    { n: overdue.count ?? 0, text: 'تكليف تجاوز موعد التسليم', href: '/admin/members?status=overdue', tone: 'red' },
     { n: sum('dormant'), text: 'عضو خامل منذ أكثر من 3 أسابيع', href: '/admin/members?status=dormant', tone: 'red' },
     { n: sum('slowing'), text: 'عضو تراجع نشاطه', href: '/admin/members?status=slowing', tone: 'amber' },
   ].filter((x) => x.n > 0);
@@ -110,6 +123,66 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         </section>
       )}
 
+      {/* ── مؤشرات صحة التنظيم ── */}
+      <section className="rounded-lg border border-slate-200 bg-white">
+        <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-2.5"><Icon name="shield" className="h-4 w-4 text-navy-600" /><h2 className="section-title">مؤشرات صحة التنظيم — آخر 30 يوماً</h2></div>
+        <div className="grid grid-cols-2 divide-x divide-x-reverse divide-y divide-slate-100 md:grid-cols-4 md:divide-y-0">
+          {[
+            ['نمو العضوية', `+${h.new_30 ?? 0}`, growth == null ? 'عضو جديد' : `${growth >= 0 ? '+' : ''}${growth}% عن الشهر السابق`],
+            ['الالتزام بمواعيد التسليم', h.approved_30 ? `${pct(h.on_time_30, h.approved_30)}%` : '—', `${h.on_time_30 ?? 0} من ${h.approved_30 ?? 0} تكليف`],
+            ['جودة التقارير من أول مراجعة', h.approved_30 ? `${pct(h.first_pass_30, h.approved_30)}%` : '—', 'دون طلب استكمال'],
+            ['متوسط زمن المراجعة', h.avg_review_hours != null ? `${h.avg_review_hours} ساعة` : '—', 'من التسليم حتى الاعتماد'],
+            ['التقارير الميدانية', h.field_reports_30 ?? 0, 'تقارير وزيارات معتمدة'],
+            ['تجنيد أعضاء جدد', h.recruitment_30 ?? 0, 'تكليفات تجنيد معتمدة'],
+            ['الفعاليات المنعقدة', h.events_30 ?? 0, `متوسط الحضور ${h.avg_attendance ?? 0} عضو`],
+            ['التغطية التنظيمية', h.leaf_units ? `${pct(h.leaf_units - (h.inactive_units?.length ?? 0), h.leaf_units)}%` : '—', `${h.inactive_units?.length ?? 0} وحدة بلا نشاط من ${h.leaf_units ?? 0}`],
+          ].map(([l, v, sub]) => (
+            <div key={String(l)} className="p-4">
+              <p className="stat-label">{l}</p>
+              <p className="mt-1 text-2xl font-bold text-navy-800">{v}</p>
+              <p className="text-[11px] text-slate-500">{sub}</p>
+            </div>
+          ))}
+        </div>
+        {((h.inactive_units?.length ?? 0) > 0 || (h.units_without_staff?.length ?? 0) > 0) && (
+          <div className="space-y-1 border-t border-slate-100 px-4 py-3 text-xs">
+            {(h.inactive_units?.length ?? 0) > 0 && <p><b className="text-red-700">وحدات بلا أي نشاط:</b> {h.inactive_units!.join('، ')}</p>}
+            {(h.units_without_staff?.length ?? 0) > 0 && <p><b className="text-amber-700">وحدات بلا أمين أو أمين مساعد:</b> {h.units_without_staff!.join('، ')}</p>}
+          </div>
+        )}
+      </section>
+
+      {/* ── أعضاء يحتاجون متابعة ── */}
+      {watch.length > 0 && (
+        <section className="rounded-lg border border-slate-200 bg-white">
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
+            <div className="flex items-center gap-2"><Icon name="users" className="h-4 w-4 text-red-700" /><h2 className="section-title">أعضاء يحتاجون متابعة</h2></div>
+            <Link href="/admin/members?status=low" className="text-xs font-semibold text-navy-600">عرض الكل</Link>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px] text-sm">
+              <thead className="bg-slate-50 text-right text-xs text-slate-500"><tr><th className="px-4 py-2">العضو</th><th>الوحدة</th><th>السبب</th><th>الالتزام</th><th>آخر نشاط</th><th></th></tr></thead>
+              <tbody>
+                {watch.map((m) => (
+                  <tr key={m.member_id} className="border-t border-slate-100">
+                    <td className="px-4 py-2 font-semibold text-navy-800">{m.full_name}</td>
+                    <td className="text-xs">{m.unit_name}</td>
+                    <td className="text-xs">
+                      {m.overdue > 0 && <span className="chip ml-1 bg-red-100 text-red-800">{m.overdue} تكليف متأخر</span>}
+                      {m.activity_status === 'dormant' && <span className="chip ml-1 bg-red-50 text-red-700">خامل</span>}
+                      {Number(m.reliability) < 0.7 && <span className="chip bg-amber-100 text-amber-900">التزام منخفض</span>}
+                    </td>
+                    <td className={Number(m.reliability) < 0.7 ? 'font-bold text-red-700' : ''}>{Math.round(Number(m.reliability) * 100)}%</td>
+                    <td className="text-xs text-slate-500">{new Date(m.last_active_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}</td>
+                    <td><Link href={`/admin/members/${m.member_id}`} className="text-xs font-semibold text-navy-600">الملف ←</Link></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
       <div className="grid gap-4 lg:grid-cols-2">
         {/* ── الأعضاء الأعلى أداءً ── */}
         <section className="rounded-lg border border-slate-200 bg-white">
@@ -130,7 +203,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                       <td className="px-4 py-2">
                         <span className={`grid h-6 w-6 place-items-center rounded text-xs font-bold ${i < 3 ? 'bg-gold-100 text-gold-600 ring-1 ring-gold-400' : 'text-slate-400'}`}>{i + 1}</span>
                       </td>
-                      <td><p className="font-semibold text-navy-800">{c.full_name}</p><p className="text-[11px] text-slate-500">{c.unit_name}{c.streak_weeks >= 3 ? ` • منتظم ${c.streak_weeks} أسابيع` : ''}</p></td>
+                      <td><Link href={`/admin/members/${c.member_id}`} className="font-semibold text-navy-800 hover:underline">{c.full_name}</Link><p className="text-[11px] text-slate-500">{c.unit_name}{c.streak_weeks >= 3 ? ` • منتظم ${c.streak_weeks} أسابيع` : ''}</p></td>
                       <td>{c.approved_30}</td>
                       <td>{c.attendance_30}</td>
                       <td className="font-bold text-navy-800">{c.points_30}</td>
@@ -158,7 +231,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                   <div className="flex items-center gap-3">
                     <span className={`grid h-6 w-6 shrink-0 place-items-center rounded text-xs font-bold ${i < 3 ? 'bg-gold-100 text-gold-600 ring-1 ring-gold-400' : 'text-slate-400'}`}>{i + 1}</span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-navy-800">{s.full_name}</p>
+                      <Link href={`/admin/members/${s.staff_id}`} className="block truncate text-sm font-semibold text-navy-800 hover:underline">{s.full_name}</Link>
                       <p className="text-[11px] text-slate-500">{ROLES[s.role]} — {s.unit_name}</p>
                     </div>
                     <span className={`chip ${g.cls}`}>{g.label}</span>
