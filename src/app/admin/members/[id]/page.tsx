@@ -4,6 +4,7 @@ import { DirectAssign } from '@/components/DirectAssign';
 import { Icon } from '@/components/Icon';
 import { MemberRoleForm } from '@/components/MemberRoleForm';
 import { NoticeForm } from '@/components/NoticeForm';
+import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { requireStaff } from '@/lib/auth';
 import { ACTIVITY_STATUS, ASSIGNMENT_STATUS, CATEGORIES, LEVELS, ROLES, fmtDate, pct, rating } from '@/lib/labels';
 import { getScopeUnits } from '@/lib/units';
@@ -17,6 +18,7 @@ type Perf = {
 };
 type A = { id: string; status: string; offered_at: string; accepted_at: string | null; submitted_at: string | null;
            reviewed_at: string | null; feedback: string | null; rework_count: number; match_reason: string | null;
+           report_lat: number | null; report_lng: number | null; report_accuracy_m: number | null;
            tasks: { title: string; category: keyof typeof CATEGORIES; deadline: string; base_points: number } | null };
 
 export default async function MemberPage({ params }: { params: Promise<{ id: string }> }) {
@@ -30,7 +32,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
   const [{ data: perfData, error }, { data: asg }, { data: att }, { data: ledger }, units] = await Promise.all([
     supabase.rpc('member_performance', { p_member: id }),
     supabase.from('assignments')
-      .select('id,status,offered_at,accepted_at,submitted_at,reviewed_at,feedback,rework_count,match_reason,tasks(title,category,deadline,base_points)')
+      .select('id,status,offered_at,accepted_at,submitted_at,reviewed_at,feedback,rework_count,match_reason,report_lat,report_lng,report_accuracy_m,tasks(title,category,deadline,base_points)')
       .eq('member_id', id).order('offered_at', { ascending: false }).limit(30).returns<A[]>(),
     supabase.from('attendance').select('id,checked_in_at,method,events(title)').eq('member_id', id)
       .order('checked_in_at', { ascending: false }).limit(10).returns<{ id: number; checked_in_at: string; method: string; events: { title: string } | null }[]>(),
@@ -69,7 +71,8 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
           <div>
             <h1 className="text-2xl font-bold">{m.full_name}</h1>
             <p className="mt-1 text-sm text-navy-100">{ROLES[m.role]} • {m.units?.name ?? 'بدون وحدة'} • المستوى: <b className="text-gold-400">{lvl.name}</b></p>
-            <p className="mt-1 text-xs text-navy-200"><span dir="ltr">{m.phone}</span> • عضو منذ {fmtDate(m.created_at)} • آخر نشاط {fmtDate(m.last_active_at)}</p>
+            <div className="mt-3"><WhatsAppButton small phone={m.phone} label="مراسلة على واتساب" text={`السلام عليكم أ/ ${m.full_name}،\n`} /></div>
+            <p className="mt-2 text-xs text-navy-200"><span dir="ltr">{m.phone}</span> • عضو منذ {fmtDate(m.created_at)} • آخر نشاط {fmtDate(m.last_active_at)}</p>
           </div>
           <div className="flex items-center gap-4 text-center">
             <div><p className="text-xs text-navy-100">الحالة</p><span className={`chip mt-1 ${ACTIVITY_STATUS[m.activity_status]?.cls}`}>{ACTIVITY_STATUS[m.activity_status]?.label}</span></div>
@@ -131,7 +134,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
       <div className="grid gap-4 lg:grid-cols-2">
         <section className="card space-y-3">
           <h2 className="section-title">تكليف مباشر لهذا العضو</h2>
-          <DirectAssign memberIds={[m.id]} unitId={m.unit_id ?? units[0]?.id ?? ""} label="إسناد تكليف جديد" />
+          <DirectAssign members={[{ id: m.id, name: m.full_name, phone: m.phone, unit: m.units?.name }]} unitId={m.unit_id ?? units[0]?.id ?? ""} label="إسناد تكليف جديد" />
         </section>
         <section className="card space-y-3">
           <h2 className="section-title">إرسال تنبيه رسمي</h2>
@@ -165,7 +168,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
         <h2 className="section-title border-b border-slate-100 px-4 py-2.5">سجل التكليفات السابقة</h2>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-sm">
-            <thead className="bg-slate-50 text-right text-xs text-slate-500"><tr><th className="px-4 py-2">التكليف</th><th>النتيجة</th><th>التسليم</th><th>في الموعد</th><th>ملاحظة الأمين</th></tr></thead>
+            <thead className="bg-slate-50 text-right text-xs text-slate-500"><tr><th className="px-4 py-2">التكليف</th><th>النتيجة</th><th>التسليم</th><th>في الموعد</th><th>الموقع</th><th>ملاحظة الأمين</th></tr></thead>
             <tbody>
               {history.map((a) => {
                 const onTime = a.submitted_at && a.tasks ? Date.parse(a.submitted_at) <= Date.parse(a.tasks.deadline) : null;
@@ -175,11 +178,14 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
                     <td><span className={`chip ${a.status === 'approved' ? 'bg-brand-100 text-brand-900' : a.status === 'declined' ? 'bg-slate-100 text-slate-600' : 'bg-red-100 text-red-800'}`}>{ASSIGNMENT_STATUS[a.status]}</span></td>
                     <td className="text-xs">{fmtDate(a.submitted_at)}</td>
                     <td>{onTime == null ? '—' : onTime ? <span className="text-brand-700">نعم</span> : <span className="text-red-700">لا</span>}</td>
+                    <td className="text-xs">{a.report_lat != null
+                      ? <a href={`https://maps.google.com/?q=${a.report_lat},${a.report_lng}`} target="_blank" rel="noreferrer" className="text-navy-600 underline">على الخريطة{a.report_accuracy_m != null ? ` (±${a.report_accuracy_m}م)` : ''}</a>
+                      : '—'}</td>
                     <td className="text-xs text-slate-500">{a.feedback ?? '—'}</td>
                   </tr>
                 );
               })}
-              {history.length === 0 && <tr><td colSpan={5} className="py-4 text-center text-slate-500">لا يوجد سجل.</td></tr>}
+              {history.length === 0 && <tr><td colSpan={6} className="py-4 text-center text-slate-500">لا يوجد سجل.</td></tr>}
             </tbody>
           </table>
         </div>

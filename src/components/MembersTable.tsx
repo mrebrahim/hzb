@@ -64,7 +64,8 @@ export function MembersTable({ rows, units, scopeUnit, initialStatus }: {
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-slate-600">{shown.length} عضو • محدد {sel.size}</p>
-        <DirectAssign memberIds={[...sel]} unitId={assignUnit} onDone={() => setSel(new Set())} />
+        <DirectAssign members={rows.filter((r) => sel.has(r.member_id)).map((r) => ({ id: r.member_id, name: r.full_name, phone: r.phone, unit: r.unit_name }))}
+          unitId={assignUnit} onDone={() => setSel(new Set())} />
       </div>
 
       <section className="overflow-x-auto rounded-lg border border-slate-200 bg-white">

@@ -18,7 +18,7 @@ type Account = { reliability: number; overdue: number; accepted_total: number };
 type Row = {
   id: string; status: string; match_reason: string | null; offer_expires_at: string | null; feedback: string | null;
   tasks: { title: string; description: string | null; category: keyof typeof CATEGORIES; base_points: number;
-           deadline: string; requires_photo: boolean; status: string } | null;
+           deadline: string; requires_photo: boolean; requires_location: boolean; status: string } | null;
 };
 
 const WEEKLY_TARGET = 50;
@@ -29,7 +29,7 @@ export default async function Home() {
     supabase.rpc('my_standing').single<Standing>(),
     supabase.rpc('my_accountability').single<Account>(),
     supabase.from('assignments')
-      .select('id,status,match_reason,offer_expires_at,feedback,tasks(title,description,category,base_points,deadline,requires_photo,status)')
+      .select('id,status,match_reason,offer_expires_at,feedback,tasks(title,description,category,base_points,deadline,requires_photo,requires_location,status)')
       .eq('member_id', profile.id).order('offered_at', { ascending: false }).limit(40).returns<Row[]>(),
     supabase.from('notifications').select('*').is('read_at', null).order('created_at', { ascending: false }).limit(6),
     supabase.from('events').select('id,title,starts_at,ends_at,points,units(name)')
@@ -183,6 +183,12 @@ export default async function Home() {
                       <div className="rounded bg-slate-50 p-2"><dt className="text-slate-500">موعد التسليم</dt><dd className="font-semibold">{fmtDate(o.tasks!.deadline)}</dd></div>
                       <div className={`rounded p-2 ${hrs < 6 ? 'bg-red-50 text-red-800' : 'bg-slate-50'}`}><dt className="opacity-70">مهلة الرد</dt><dd className="font-semibold">{timeLeft(o.offer_expires_at!)}</dd></div>
                     </dl>
+                    {(o.tasks!.requires_location || o.tasks!.requires_photo) && (
+                      <p className="flex flex-wrap gap-1.5 text-[11px]">
+                        {o.tasks!.requires_location && <span className="rounded border border-navy-200 bg-navy-50 px-2 py-0.5 text-navy-700">يتطلب تحديد الموقع عند التسليم</span>}
+                        {o.tasks!.requires_photo && <span className="rounded border border-navy-200 bg-navy-50 px-2 py-0.5 text-navy-700">يتطلب صورة إثبات</span>}
+                      </p>
+                    )}
                     {o.match_reason && <p className="text-xs text-slate-500"><span className="font-semibold text-slate-700">أسباب الترشيح: </span>{o.match_reason.split(' • ').join('، ')}</p>}
                     <div className="flex items-center gap-2 pt-1">
                       <RpcButton fn="accept_assignment" args={{ p_id: o.id }} label="قبول التكليف" doneMessage="تم تسجيل قبولك للتكليف" />
@@ -219,7 +225,7 @@ export default async function Home() {
                   {x.status === 'rework' && x.feedback && <p className="mt-3 rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">ملاحظة الأمين: {x.feedback}</p>}
                   {x.status !== 'submitted' ? (
                     <div className="mt-3 space-y-2">
-                      <SubmitForm assignmentId={x.id} memberId={profile.id} requiresPhoto={!!x.tasks?.requires_photo} />
+                      <SubmitForm assignmentId={x.id} memberId={profile.id} requiresPhoto={!!x.tasks?.requires_photo} requiresLocation={!!x.tasks?.requires_location} />
                       <RpcButton fn="withdraw_assignment" args={{ p_id: x.id }} label="تعذّر الاستكمال"
                         className="text-xs text-slate-500 underline" confirm="سيتم تسجيل الاعتذار وإسناد التكليف لعضو آخر. هل أنت متأكد؟" />
                     </div>

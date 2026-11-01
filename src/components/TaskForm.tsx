@@ -3,6 +3,8 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { CATEGORIES, PRIORITIES, SIZES, SKILLS } from '@/lib/labels';
+import { assignmentMessage } from '@/lib/whatsapp';
+import { WhatsAppButton } from './WhatsAppButton';
 
 const TEMPLATES: { title: string; category: keyof typeof CATEGORIES; size: keyof typeof SIZES; description: string; photo?: boolean }[] = [
   { title: 'تقرير ميداني أسبوعي عن احتياجات المنطقة', category: 'field_report', size: 'small', description: 'زور مكانين في منطقتك واكتب أهم 3 احتياجات للأهالي مع صورة.', photo: true },
@@ -21,6 +23,8 @@ export function TaskForm({ units }: { units: U[] }) {
   const [tpl, setTpl] = useState<(typeof TEMPLATES)[number] | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState<{ title: string; deadline: string; loc: boolean; photo: boolean;
+    members: { id: string; name: string; phone: string | null; unit: string | null }[] } | null>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,12 +43,23 @@ export function TaskForm({ units }: { units: U[] }) {
       deadline: new Date(String(f.get('deadline'))).toISOString(),
       required_skills: f.getAll('required_skills'),
       requires_photo: f.get('requires_photo') === 'on',
+      requires_location: f.get('requires_location') === 'on',
       created_by: user!.id,
     }).select('id').single();
     if (error) { setBusy(false); return setMsg(error.message); }
     const { data: n } = await supabase.rpc('distribute_task', { p_task: data.id });
+    // المرشحين اللي اتعرض عليهم التكليف، عشان نبعتلهم على واتساب
+    const { data: offered } = await supabase.from('assignments')
+      .select('member:profiles!assignments_member_id_fkey(id,full_name,phone,units(name))').eq('task_id', data.id)
+      .returns<{ member: { id: string; full_name: string; phone: string | null; units: { name: string } | null } | null }[]>();
     setBusy(false);
-    setMsg(`اتعملت المهمة واتعرضت على ${n ?? 0} عضو مناسب`);
+    setMsg(`تم إنشاء التكليف وعرضه على ${n ?? 0} عضو مناسب`);
+    setSent({
+      title: String(f.get('title')), deadline: new Date(String(f.get('deadline'))).toISOString(),
+      loc: f.get('requires_location') === 'on', photo: f.get('requires_photo') === 'on',
+      members: (offered ?? []).filter((o) => o.member).map((o) => ({ id: o.member!.id, name: o.member!.full_name, phone: o.member!.phone, unit: o.member!.units?.name ?? null })),
+    });
+    setOpen(false);
     (e.target as HTMLFormElement).reset();
     setTpl(null);
     router.refresh();
@@ -52,16 +67,35 @@ export function TaskForm({ units }: { units: U[] }) {
 
   if (!open)
     return (
-      <div className="flex items-center gap-3">
-        <button className="btn-primary" onClick={() => setOpen(true)}>+ مهمة جديدة</button>
-        {msg && <span className="text-sm text-emerald-700">{msg}</span>}
+      <div className="flex flex-wrap items-center gap-3">
+        <button className="btn-primary" onClick={() => { setOpen(true); setSent(null); setMsg(null); }}>+ تكليف جديد</button>
+        {msg && !sent && <span className="text-sm text-emerald-700">{msg}</span>}
+        {sent && (
+          <div className="w-full rounded-lg border border-brand-500/40 bg-brand-50 p-4">
+            <p className="text-sm font-bold text-brand-900">{msg}</p>
+            {sent.members.length > 0 ? (
+              <>
+                <p className="mt-1 text-xs text-slate-600">أرسل التكليف للمرشحين على واتساب (يفتح واتساب برسالة جاهزة):</p>
+                <div className="mt-2 divide-y divide-brand-100 rounded-md border border-brand-100 bg-white">
+                  {sent.members.map((m) => (
+                    <div key={m.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
+                      <span className="font-semibold text-navy-800">{m.name} <span className="text-xs font-normal text-slate-400">{m.unit}</span></span>
+                      <WhatsAppButton small phone={m.phone} text={assignmentMessage({ name: m.name, title: sent.title, deadline: sent.deadline, unit: m.unit,
+                        url: window.location.origin, requiresLocation: sent.loc, requiresPhoto: sent.photo })} />
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : <p className="mt-1 text-xs text-slate-600">لم يُعثر على مرشحين مناسبين حالياً؛ سيعيد النظام المحاولة تلقائياً.</p>}
+          </div>
+        )}
       </div>
     );
 
   const tomorrow = new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 16);
   return (
     <form key={tpl?.title ?? 'blank'} onSubmit={onSubmit} className="card space-y-3">
-      <div className="flex items-center justify-between"><h2 className="h2">مهمة جديدة</h2>
+      <div className="flex items-center justify-between"><h2 className="section-title">تكليف جديد</h2>
         <button type="button" className="text-sm text-slate-500" onClick={() => setOpen(false)}>إغلاق</button></div>
       <div>
         <span className="label">ابدأ من قالب</span>
@@ -88,9 +122,12 @@ export function TaskForm({ units }: { units: U[] }) {
           ))}
         </div>
       </div>
-      <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="requires_photo" defaultChecked={tpl?.photo} className="accent-brand-600" /> لازم صورة إثبات</label>
+      <div className="flex flex-wrap gap-4 text-sm">
+        <label className="flex items-center gap-2"><input type="checkbox" name="requires_location" defaultChecked={tpl?.category === 'door_to_door' || tpl?.category === 'field_report'} /> يتطلب تحديد الموقع عند التسليم</label>
+        <label className="flex items-center gap-2"><input type="checkbox" name="requires_photo" defaultChecked={tpl?.photo} /> يتطلب صورة إثبات</label>
+      </div>
       {msg && <p className="text-sm text-red-600">{msg}</p>}
-      <button className="btn-primary" disabled={busy}>{busy ? '...' : 'إنشاء ووزّع تلقائياً'}</button>
+      <button className="btn-primary" disabled={busy}>{busy ? '...' : 'إنشاء وتوزيع تلقائي'}</button>
     </form>
   );
 }

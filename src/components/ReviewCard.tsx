@@ -2,10 +2,12 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { LocationMap } from './LocationMap';
 
-type Props = { id: string; header: string; meta: string; report: string; photo: string | null; map: string | null };
+type Props = { id: string; header: string; meta: string; report: string; photo: string | null;
+  loc: { lat: number; lng: number; accuracy: number | null } | null };
 
-export function ReviewCard({ id, header, meta, report, photo, map }: Props) {
+export function ReviewCard({ id, header, meta, report, photo, loc }: Props) {
   const router = useRouter();
   const [feedback, setFeedback] = useState('');
   const [busy, setBusy] = useState(false);
@@ -28,8 +30,14 @@ export function ReviewCard({ id, header, meta, report, photo, map }: Props) {
       <div className="flex flex-wrap gap-3 text-sm">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {photo && <a href={photo} target="_blank" rel="noreferrer"><img src={photo} alt="إثبات" className="h-32 rounded-md object-cover" /></a>}
-        {map && <a href={map} target="_blank" rel="noreferrer" className="text-navy-700 underline">الموقع على الخريطة</a>}
+
       </div>
+      {loc ? (
+        <div>
+          <p className="mb-1 text-xs font-semibold text-slate-600">موقع العضو لحظة التسليم</p>
+          <LocationMap lat={loc.lat} lng={loc.lng} accuracy={loc.accuracy} />
+        </div>
+      ) : <p className="text-xs text-slate-400">لم يُرفق موقع مع هذا التقرير.</p>}
       <input value={feedback} onChange={(e) => setFeedback(e.target.value)} className="input" placeholder="كلمة شكر أو ملاحظة للعضو (بتوصله مع النتيجة)" />
       {err && <p className="text-xs text-red-600">{err}</p>}
       <div className="flex gap-2">

@@ -54,6 +54,16 @@ begin
   order by p.id, t.deadline desc
   on conflict do nothing;
 
+  -- الموقع عند التسليم: تكليف العضو الحالي يشترط الموقع، والتقارير المعلّقة عليها مواقع في القاهرة
+  update public.tasks t set requires_location = true
+  from public.units u where u.id = t.unit_id and u.is_demo and t.status = 'open' and t.category in ('door_to_door', 'field_report');
+  update public.assignments a set
+    report_lat = 30.0444 + ((abs(hashtext(a.id::text)) % 400) - 200) / 10000.0 + 0.012,
+    report_lng = 31.2357 + ((abs(hashtext(a.id::text || 'x')) % 400) - 200) / 10000.0 + 0.09,
+    report_accuracy_m = 8 + abs(hashtext(a.id::text)) % 25
+  from public.tasks t join public.units u on u.id = t.unit_id and u.is_demo
+  where t.id = a.task_id and a.submitted_at is not null and a.report_lat is null;
+
   -- مركز جديد بدون نشاط ولا أمين (عشان مؤشر التغطية التنظيمية يبان)
   insert into public.units(name, type, parent_id, is_demo)
   select 'العجمي', 'center', id, true from public.units where is_demo and name = 'الإسكندرية'
