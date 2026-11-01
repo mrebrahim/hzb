@@ -83,7 +83,7 @@ export default async function Home() {
                 <p className="text-[11px] text-navy-100">نقطة</p>
               </div>
             </Ring>
-            <div className="min-w-0 flex-1">
+            <div className="order-last min-w-0 basis-full sm:order-none sm:basis-0 sm:flex-1">
               <p className="text-sm text-navy-100">{ROLES[profile.role]} • {s.unit_name ?? 'لم تُحدد الوحدة'}{s.parent_name ? ` — ${s.parent_name}` : ''}</p>
               <h1 className="mt-0.5 text-2xl font-bold">{profile.full_name}</h1>
               <p className="mt-1 text-sm">
@@ -92,7 +92,7 @@ export default async function Home() {
               </p>
               {nextLevel && <p className="mt-1 text-xs text-navy-100">عند الترقي: {nextLevel.perk}</p>}
             </div>
-            <div className="text-center">
+            <div className="mr-auto text-center sm:mr-0">
               <p className="text-xs text-navy-100">التقييم الشهري</p>
               <p className={`mt-1 rounded px-3 py-1 text-sm font-bold ${rate.cls}`}>{rate.label}</p>
             </div>
